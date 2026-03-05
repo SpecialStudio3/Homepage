@@ -120,7 +120,6 @@ Email: chmforsman(at)gmail.com
 
 <hr color="#FF00FF">
 
-
 <center>
 
 <font face="Courier New" color="lime"><b>SNAKE</b></font><br>
@@ -128,6 +127,8 @@ Email: chmforsman(at)gmail.com
 <canvas id="snakeGame" width="200" height="200" style="background:black;border:2px solid #FF00FF;"></canvas>
 
 <br>
+
+
 
 <font face="Courier New" size="2" color="lime">
 Score: <span id="score">0</span>
@@ -138,6 +139,8 @@ Score: <span id="score">0</span>
 <font face="Courier New" size="2" color="red" id="gameOver" style="visibility:hidden;">
 <b>GAME OVER</b>
 </font>
+
+
 
 <br>
 
@@ -157,7 +160,6 @@ let gameLoop, blinkLoop, gameRunning=false;
 let nextDir = null;
 let moveProgress = 0; // progress 0->1 per tick
 let glowFrames = 0; // glow when eating
-let foodColor = "red"; // normal or rare
 
 function startGame(){
     clearInterval(gameLoop);
@@ -176,7 +178,6 @@ function startGame(){
     moveProgress = 0;
     score = 0;
     glowFrames = 0;
-    foodColor = "red";
     gameRunning = true;
 
     document.getElementById("score").innerText = score;
@@ -236,28 +237,13 @@ function update(){
 
         // Eat food
         if(head.x===food.x && head.y===food.y){
-            glowFrames = 5; // glow frames
-
-            if(foodColor === "lime"){
-                score += 3;
-                // grow 3 extra segments by duplicating tail
-                const tail = snake[snake.length-1];
-                for(let i=0;i<3;i++){
-                    snake.push({x:tail.x,y:tail.y});
-                }
-            } else {
-                score += 1;
-            }
+            score++;
             document.getElementById("score").innerText = score;
 
-            // spawn next food
-            food = {
-                x: Math.floor(Math.random()*grid),
-                y: Math.floor(Math.random()*grid)
-            };
+            glowFrames = 5; // number of frames for glow effect
 
-            // 5% chance rare green food
-            foodColor = Math.random() < 0.15 ? "lime" : "red";
+            // new food
+            food = {x: Math.floor(Math.random()*grid), y: Math.floor(Math.random()*grid)};
         } else {
             snake.pop();
         }
@@ -277,6 +263,7 @@ function draw(){
         const s = snake[i];
         const next = snake[i-1] || s;
 
+        // calculate smooth position based on previous segment
         let x = s.x*tileSize;
         let y = s.y*tileSize;
         if(i===0){
@@ -292,7 +279,7 @@ function draw(){
         ctx.fillStyle = `hsl(${hue},100%,50%)`;
         ctx.fillRect(x,y,tileSize-1,tileSize-1);
 
-        // glow effect
+        // glow effect if eating
         if(glowFrames>0){
             ctx.fillStyle = `rgba(${(i*20)%255},255,255,0.3)`;
             ctx.fillRect(x-2,y-2,tileSize+4,tileSize+4);
@@ -300,7 +287,7 @@ function draw(){
     }
 
     // draw food
-    ctx.fillStyle = foodColor;
+    ctx.fillStyle="red";
     ctx.fillRect(food.x*tileSize,food.y*tileSize,tileSize-1,tileSize-1);
 }
 
@@ -309,7 +296,7 @@ function gameOver(){
     gameRunning=false;
 
     const go = document.getElementById("gameOver");
-    go.style.visibility = "visible";
+    go.style.visibility="visible";
 
     blinkLoop = setInterval(()=>{
         go.style.visibility = go.style.visibility==="hidden"?"visible":"hidden";
@@ -321,11 +308,6 @@ function gameOver(){
 
 startGame();
 </script>
-
-
-
-
-
 <hr color="#FF00FF">
 
 </font>
